@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Produtos</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            line-height: 1.6; 
+            background-color: #f4f4f4; 
+            color: #333; 
+            padding: 20px; 
+            margin: 0; 
+        }
+        h1, h2 { 
+            color: #4CAF50; 
+        }
+        .product { 
+            background: #fff; 
+            margin-bottom: 20px; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+            transition: transform 0.3s; 
+        }
+        .product:hover { 
+            transform: scale(1.02); 
+        }
+        .product h2 { 
+            margin: 0 0 10px 0; 
+            font-size: 1.4em; 
+        }
+        .product p { 
+            margin: 5px 0; 
+        }
+        .product a { 
+            text-decoration: none; 
+            color: #4CAF50; 
+        }
+        .product a:hover { 
+            text-decoration: underline; 
+        }
+        .cart { 
+            border-top: 2px solid #4CAF50; 
+            padding-top: 10px; 
+            margin-top: 20px; 
+        }
+        .cart-item { 
+            margin-bottom: 10px; 
+        }
+        button { 
+            background: #4CAF50; 
+            color: #fff; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            transition: background 0.3s; 
+        }
+        button:hover { 
+            background: #45a049; 
+        }
+        @media (min-width: 600px) {
+            .product { 
+                display: flex; 
+                flex-direction: row; 
+                justify-content: space-between; 
+                align-items: center; 
+            }
+            .product-details { 
+                flex: 1; 
+            }
+            .product button { 
+                margin-left: 20px; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Catálogo de Produtos</h1>
+    <div id="catalog"></div>
+
+    <h2>Carrinho</h2>
+    <div id="cart" class="cart"></div>
+    <button id="sendOrder">Enviar Pedido pelo WhatsApp</button>
+
+    <script>
+        // URL do JSON
+        const jsonUrl = 'https://pastebin.com/raw/UfDfz5cF';
+
+        // Função para criar o HTML do catálogo
+        function createCatalog(products) {
+            const catalog = document.getElementById('catalog');
+            products.forEach(product => {
+                const productDiv = document.createElement('div');
+                productDiv.classList.add('product');
+
+                const productDetailsDiv = document.createElement('div');
+                productDetailsDiv.classList.add('product-details');
+
+                const productName = document.createElement('h2');
+                productName.textContent = product.name;
+
+                const productDescription = document.createElement('p');
+                productDescription.innerHTML = `<strong>Descrição:</strong> ${product.description}`;
+
+                const productPrice = document.createElement('p');
+                productPrice.innerHTML = `<strong>Preço:</strong> R$ ${product.price.toFixed(2)}`;
+
+                const productLink = document.createElement('p');
+                const link = document.createElement('a');
+                link.href = product.link;
+                link.textContent = 'Link para Produto';
+                productLink.appendChild(link);
+
+                const addToCartButton = document.createElement('button');
+                addToCartButton.textContent = 'Adicionar ao Carrinho';
+                addToCartButton.onclick = () => addToCart(product);
+
+                productDetailsDiv.appendChild(productName);
+                productDetailsDiv.appendChild(productDescription);
+                productDetailsDiv.appendChild(productPrice);
+                productDetailsDiv.appendChild(productLink);
+
+                productDiv.appendChild(productDetailsDiv);
+                productDiv.appendChild(addToCartButton);
+
+                catalog.appendChild(productDiv);
+            });
+        }
+
+        // Função para adicionar produto ao carrinho
+        function addToCart(product) {
+            const cart = document.getElementById('cart');
+            const cartItem = document.createElement('div');
+            cartItem.classList.add('cart-item');
+
+            const itemName = document.createElement('p');
+            itemName.textContent = product.name;
+
+            const itemPrice = document.createElement('p');
+            itemPrice.innerHTML = `<strong>Preço:</strong> R$ ${product.price.toFixed(2)}`;
+
+            cartItem.appendChild(itemName);
+            cartItem.appendChild(itemPrice);
+
+            cart.appendChild(cartItem);
+        }
+
+        // Função para gerar a mensagem do pedido
+        function generateOrderMessage() {
+            const cartItems = document.querySelectorAll('.cart-item');
+            let message = 'Pedido:\n';
+            cartItems.forEach(item => {
+                const name = item.querySelector('p').textContent;
+                const price = item.querySelector('p:nth-child(2)').textContent;
+                message += `${name} - ${price}\n`;
+            });
+            return encodeURIComponent(message);
+        }
+
+        // Função para enviar o pedido via WhatsApp
+        function sendOrder() {
+            const message = generateOrderMessage();
+            const whatsappLink = `https://wa.me/?text=${message}`;
+            window.open(whatsappLink, '_blank');
+        }
+
+        // Adicionar evento ao botão de enviar pedido
+        document.getElementById('sendOrder').addEventListener('click', sendOrder);
+
+        // Função para buscar e processar o JSON
+        fetch(jsonUrl)
+            .then(response => response.json())
+            .then(data => createCatalog(data))
+            .catch(error => console.error('Erro ao carregar o JSON:', error));
+    </script>
+
+</body>
+</html>
